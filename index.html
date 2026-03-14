@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Auto-Restore</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <h1 class="logo">✨ <span data-i18n="title">AI Auto-Restore</span></h1>
+            <div class="header-controls">
+                <button id="toggleAnalyticsBtn" class="lang-btn" aria-label="Toggle Analytics">📊</button>
+                <button id="toggleHistoryBtn" class="lang-btn" aria-label="Toggle History">🕒</button>
+                <button id="themeToggle" class="lang-btn" aria-label="Toggle Dark Mode">🌙</button>
+                <button id="langToggle" class="lang-btn" aria-label="Toggle Language">EN / ไทย</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <section id="uploadSection" class="card fade-in">
+            <h2 data-i18n="uploadTitle">Upload Photograph</h2>
+            <div id="dropZone" class="drop-zone" role="button" tabindex="0" aria-label="File upload drop zone">
+                <div class="drop-zone-content">
+                    <span class="upload-icon">📁</span>
+                    <p data-i18n="dragDrop">Drag & Drop your image here or Click to Browse</p>
+                    <p class="sub-text" data-i18n="fileLimits">Max 10MB (JPG, PNG, WebP)</p>
+                </div>
+                <input type="file" id="fileInput" accept="image/jpeg, image/png, image/webp" hidden>
+            </div>
+            
+            <div id="previewContainer" class="hidden">
+                <img id="imagePreview" src="" alt="Image Preview">
+                <div id="fileMetadata" class="metadata">
+                    <div id="metaFilename" style="font-weight: 600; margin-bottom: 4px;"></div>
+                    <div id="metaDetails"></div>
+                </div>
+                <button id="analyzeBtn" class="btn primary-btn">
+                    <span id="analyzeBtnText" data-i18n="analyzeBtn">Analyze Image</span>
+                    <div id="loadingSpinner" class="spinner hidden"></div>
+                </button>
+            </div>
+        </section>
+
+        <section id="analyticsSection" class="card fade-in hidden">
+            <div class="history-header">
+                <h2>📊 <span data-i18n="analyticsTitle">Analytics Dashboard</span></h2>
+            </div>
+            <div class="analytics-grid">
+                <div class="stat-card">
+                    <h3 data-i18n="statTotal">Total Analyses</h3>
+                    <div id="statTotalVal" class="stat-value">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3 data-i18n="statAvgScore">Avg. Overall Score</h3>
+                    <div id="statAvgScoreVal" class="stat-value">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3 data-i18n="statTopIssues">Most Common Issues</h3>
+                    <div id="statTopIssuesVal" class="stat-list">No data yet</div>
+                </div>
+                <div class="stat-card">
+                    <h3 data-i18n="statMostCopied">Most Copied Solution</h3>
+                    <div id="statMostCopiedVal" class="stat-value stat-text">None</div>
+                </div>
+                <div class="chart-container">
+                    <h3 data-i18n="chartRadar">Average Dimensions</h3>
+                    <canvas id="radarChart" width="300" height="300"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3 data-i18n="chartTrend">Score Trend (Last 20)</h3>
+                    <canvas id="lineChart" width="400" height="250"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section id="historySection" class="card fade-in hidden">
+            <div class="history-header">
+                <h2>🕒 <span data-i18n="historyTitle">Recent Analyses</span> (<span id="historyCount">0</span>/10)</h2>
+                <button id="clearHistoryBtn" class="btn danger-btn">🗑️ <span data-i18n="clearHistory">Clear All</span></button>
+            </div>
+            <div id="historyList" class="history-list">
+                <div id="emptyHistory" class="empty-state">
+                    <span data-i18n="emptyHistory">No recent analyses found.</span>
+                </div>
+            </div>
+        </section>
+
+        <section id="resultsSection" class="hidden fade-in">
+            <h2 data-i18n="resultsTitle">Analysis Results</h2>
+            
+            <div class="results-grid">
+                <div class="card scores-card">
+                    <div class="overall-score-container">
+                        <h3 data-i18n="overallScore">Overall Score</h3>
+                        <div class="overall-score-circle">
+                            <span id="overallScoreValue">0</span><small>/100</small>
+                        </div>
+                    </div>
+                    
+                    <div class="dimensions-list">
+                        <div class="dimension">
+                            <div class="dim-header"><span data-i18n="dimClean">Cleanliness</span><span id="valClean">0</span></div>
+                            <div class="progress-bar"><div id="barClean" class="progress"></div></div>
+                        </div>
+                        <div class="dimension">
+                            <div class="dim-header"><span data-i18n="dimColor">Color</span><span id="valColor">0</span></div>
+                            <div class="progress-bar"><div id="barColor" class="progress"></div></div>
+                        </div>
+                        <div class="dimension">
+                            <div class="dim-header"><span data-i18n="dimBright">Brightness</span><span id="valBright">0</span></div>
+                            <div class="progress-bar"><div id="barBright" class="progress"></div></div>
+                        </div>
+                        <div class="dimension">
+                            <div class="dim-header"><span data-i18n="dimSharp">Sharpness</span><span id="valSharp">0</span></div>
+                            <div class="progress-bar"><div id="barSharp" class="progress"></div></div>
+                        </div>
+                        <div class="dimension">
+                            <div class="dim-header"><span data-i18n="dimNoise">Noise</span><span id="valNoise">0</span></div>
+                            <div class="progress-bar"><div id="barNoise" class="progress"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="prompts-container">
+                    <div class="prompts-header">
+                        <h3 data-i18n="recommendedPrompts">Recommended Solutions</h3>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                            <button id="downloadAllBtn" class="filter-btn">
+                                💾 <span data-i18n="downloadAll">Download All</span>
+                            </button>
+                            <button id="filterFavoritesBtn" class="filter-btn">
+                                <span data-i18n="filterFavs">⭐ Favorites</span> (<span id="favCount">0</span>)
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="prompts-grid">
+                        <div class="prompt-card" data-id="1">
+                            <div class="card-header">
+                                <h4>🗑️ <span data-i18n="p1Title">Remove Scratches</span></h4>
+                                <button class="fav-btn" aria-label="Toggle Favorite" data-id="1">☆</button>
+                            </div>
+                            <button class="btn copy-btn" data-prompt="1" data-i18n="copyBtn">Copy Prompt</button>
+                            <button class="btn download-btn" data-prompt="1">⬇️ <span data-i18n="downloadBtn">Download</span></button>
+                        </div>
+                        <div class="prompt-card" data-id="2">
+                            <div class="card-header">
+                                <h4>🎨 <span data-i18n="p2Title">Restore Colors</span></h4>
+                                <button class="fav-btn" aria-label="Toggle Favorite" data-id="2">☆</button>
+                            </div>
+                            <button class="btn copy-btn" data-prompt="2" data-i18n="copyBtn">Copy Prompt</button>
+                            <button class="btn download-btn" data-prompt="2">⬇️ <span data-i18n="downloadBtn">Download</span></button>
+                        </div>
+                        <div class="prompt-card" data-id="3">
+                            <div class="card-header">
+                                <h4>☀️ <span data-i18n="p3Title">Enhance Brightness</span></h4>
+                                <button class="fav-btn" aria-label="Toggle Favorite" data-id="3">☆</button>
+                            </div>
+                            <button class="btn copy-btn" data-prompt="3" data-i18n="copyBtn">Copy Prompt</button>
+                            <button class="btn download-btn" data-prompt="3">⬇️ <span data-i18n="downloadBtn">Download</span></button>
+                        </div>
+                        <div class="prompt-card" data-id="4">
+                            <div class="card-header">
+                                <h4>✨ <span data-i18n="p4Title">Enhance Sharpness</span></h4>
+                                <button class="fav-btn" aria-label="Toggle Favorite" data-id="4">☆</button>
+                            </div>
+                            <button class="btn copy-btn" data-prompt="4" data-i18n="copyBtn">Copy Prompt</button>
+                            <button class="btn download-btn" data-prompt="4">⬇️ <span data-i18n="downloadBtn">Download</span></button>
+                        </div>
+                        <div class="prompt-card" data-id="5">
+                            <div class="card-header">
+                                <h4>📸 <span data-i18n="p5Title">Enhance Detail</span></h4>
+                                <button class="fav-btn" aria-label="Toggle Favorite" data-id="5">☆</button>
+                            </div>
+                            <button class="btn copy-btn" data-prompt="5" data-i18n="copyBtn">Copy Prompt</button>
+                            <button class="btn download-btn" data-prompt="5">⬇️ <span data-i18n="downloadBtn">Download</span></button>
+                        </div>
+                        <div class="prompt-card" data-id="6">
+                            <div class="card-header">
+                                <h4>🎯 <span data-i18n="p6Title">Improve Contrast</span></h4>
+                                <button class="fav-btn" aria-label="Toggle Favorite" data-id="6">☆</button>
+                            </div>
+                            <button class="btn copy-btn" data-prompt="6" data-i18n="copyBtn">Copy Prompt</button>
+                            <button class="btn download-btn" data-prompt="6">⬇️ <span data-i18n="downloadBtn">Download</span></button>
+                        </div>
+                        <div class="prompt-card" data-id="7">
+                            <div class="card-header">
+                                <h4>💡 <span data-i18n="p7Title">Fix Color Cast</span></h4>
+                                <button class="fav-btn" aria-label="Toggle Favorite" data-id="7">☆</button>
+                            </div>
+                            <button class="btn copy-btn" data-prompt="7" data-i18n="copyBtn">Copy Prompt</button>
+                            <button class="btn download-btn" data-prompt="7">⬇️ <span data-i18n="downloadBtn">Download</span></button>
+                        </div>
+                        <div class="prompt-card" data-id="8">
+                            <div class="card-header">
+                                <h4>🖼️ <span data-i18n="p8Title">Restore Vintage Photos</span></h4>
+                                <button class="fav-btn" aria-label="Toggle Favorite" data-id="8">☆</button>
+                            </div>
+                            <button class="btn copy-btn" data-prompt="8" data-i18n="copyBtn">Copy Prompt</button>
+                            <button class="btn download-btn" data-prompt="8">⬇️ <span data-i18n="downloadBtn">Download</span></button>
+                        </div>
+                        <div class="prompt-card" data-id="9">
+                            <div class="card-header">
+                                <h4>👤 <span data-i18n="p9Title">Enhance Skin Tones</span></h4>
+                                <button class="fav-btn" aria-label="Toggle Favorite" data-id="9">☆</button>
+                            </div>
+                            <button class="btn copy-btn" data-prompt="9" data-i18n="copyBtn">Copy Prompt</button>
+                            <button class="btn download-btn" data-prompt="9">⬇️ <span data-i18n="downloadBtn">Download</span></button>
+                        </div>
+                        <div class="prompt-card" data-id="10">
+                            <div class="card-header">
+                                <h4>🌳 <span data-i18n="p10Title">Enhance Foliage</span></h4>
+                                <button class="fav-btn" aria-label="Toggle Favorite" data-id="10">☆</button>
+                            </div>
+                            <button class="btn copy-btn" data-prompt="10" data-i18n="copyBtn">Copy Prompt</button>
+                            <button class="btn download-btn" data-prompt="10">⬇️ <span data-i18n="downloadBtn">Download</span></button>
+                        </div>
+                        <div class="prompt-card" data-id="11">
+                            <div class="card-header">
+                                <h4>🏔️ <span data-i18n="p11Title">Recover Shadow Details</span></h4>
+                                <button class="fav-btn" aria-label="Toggle Favorite" data-id="11">☆</button>
+                            </div>
+                            <button class="btn copy-btn" data-prompt="11" data-i18n="copyBtn">Copy Prompt</button>
+                            <button class="btn download-btn" data-prompt="11">⬇️ <span data-i18n="downloadBtn">Download</span></button>
+                        </div>
+                        <div class="prompt-card" data-id="12">
+                            <div class="card-header">
+                                <h4>✨ <span data-i18n="p12Title">Full Restoration</span></h4>
+                                <button class="fav-btn" aria-label="Toggle Favorite" data-id="12">☆</button>
+                            </div>
+                            <button class="btn copy-btn" data-prompt="12" data-i18n="copyBtn">Copy Prompt</button>
+                            <button class="btn download-btn" data-prompt="12">⬇️ <span data-i18n="downloadBtn">Download</span></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 AI Auto-Restore. All rights reserved.</p>
+    </footer>
+
+    <div id="toast" class="toast hidden">
+        ✅ <span data-i18n="copiedSuccess">Copied!</span>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
